@@ -12,7 +12,6 @@ from aiogram.filters import ChatMemberUpdatedFilter
 from aiogram.client.default import DefaultBotProperties
 from dotenv import load_dotenv
 
-
 # ===================== إعدادات =====================
 
 load_dotenv()
@@ -28,7 +27,7 @@ ADMIN_IDS = {5559869840}
 WARNING_DELETE_AFTER = 10
 
 if not BOT_TOKEN:
-    raise RuntimeError("BOT_TOKEN is missing in .env or Render Environment Variables")
+    raise RuntimeError("BOT_TOKEN is missing in .env / Render Environment")
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger("spam-guard-bot")
@@ -162,7 +161,7 @@ async def send_welcome(bot: Bot, chat_id: int, user_id: int, full_name: str, use
         pass
 
 
-# ===================== ترحيب عند الانضمام =====================
+# ===================== ترحيب عند الانضمام (إذا وصل الحدث) =====================
 
 @dp.chat_member(ChatMemberUpdatedFilter(member_status_changed=(ChatMemberStatus.LEFT, ChatMemberStatus.MEMBER)))
 async def on_user_join(event: ChatMemberUpdated, bot: Bot):
@@ -243,13 +242,13 @@ async def on_message(message: Message, bot: Bot):
     asyncio.create_task(lift_later())
 
 
-# ===================== تشغيل =====================
+# ===================== تشغيل البوت (Polling) =====================
 
 async def main():
     bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+
+    # ✅ مهم جدًا: يمسح أي Webhook ويمنع التعارضات
+    await bot.delete_webhook(drop_pending_updates=True)
+
     log.info("Bot is running...")
     await dp.start_polling(bot)
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
